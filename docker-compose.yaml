@@ -2,25 +2,52 @@ version: '3'
 
 volumes:
  repo:
+ portainer_data:
 
 services:
  site:
   image: rodoxxx/site3:v1
   hostname: rodolfo
   container_name: rodolfo
-  ports:
-   - 8085:80
+  labels:
+   - "traefik.frontend.rule=Host:rodolfo.dexter.com.br"
+   - "traefik.port=80"
+  #ports:
+  # - 8085:80
   volumes:
    - repo:/usr/local/apache/htdocs
    - /srv/backup:/data
 
  monitoracao:
   image: google/cadvisor
-  ports:
-   - 8585:8080
+  labels:
+   - "traefik.frontend.rule=Host:monitoracao.dexter.com.br"
+   - "traefik.port=8080"
+  #ports:
+  # - 8585:8080
   volumes:
    - /:/rootfs:ro
    - /var/run:/var/run:ro
    - /sys:/sys:ro
    - /var/lib/docker:/var/lib/docker:ro
    - /dev/disk:/dev/disk:ro
+
+ portainer:
+  image: portainer/portainer
+  ports:
+   - 9000:9000
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - portainer_data:/data
+
+ reverse-proxy:
+  image: traefik
+  command:
+   - "--api"
+   - "--docker"
+   - "--web"
+  ports:
+   - 80:80
+   - 8080:8080
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
