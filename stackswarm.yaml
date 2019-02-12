@@ -22,6 +22,23 @@ services:
     constraints:
      - node.role == manager
 
+ monitoracao:
+  image: google/cadvisor:latest
+  ports: 
+   - 8585:8080
+  deploy:
+   mode: global
+   resources:
+    limits:
+     cpus: '0.5'
+     memory: 512M
+  volumes:
+   - /:/rootfs:ro
+   - /var/run:/var/run:ro
+   - /sys:/sys:ro
+   - /var/lib/docker:/var/lib/docker:ro
+   - /dev/disk:/dev/disk:ro
+
  site:
   image: rodoxxx/site3:v1
   #ports:
